@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Verdana', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            overflow: auto;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: left;
+            text-indent: 1em;
+            font-family: 'Verdana', sans-serif;
+        }
+        nav {
+            margin: 0;
+            padding: 10px;
+            background: #444;
+            text-align: right;
+            text-indent: 1em;
+        }
+        nav a {
+            color: #fff;
+            margin: 0 10px;
+            text-decoration: none;
+            background-color: #444;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        
+        nav a:hover {
+            background-color: #555;
+        }
+
+        .title-link {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.3s ease;
+        }
+
+        .title-link:hover {
+            color: #555;
+        }
+
+        .custom-in-text-link {
+            color: #0000ff;
+            text-decoration: none;
+        }
+
+        .custom-link {
+            color: #444;
+            text-decoration: none;
+            background-color: #ddd;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        .custom-link:hover {
+            background-color: #ccc;
+            color: #222;
+        }
+
+        main {
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+        footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+     </style>
+</head>
+<body>
+    <header>
+        <h1>Samuel Georgiev</h1>
+    </header>
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+    </nav>
+    <main>
+        <section id="home">
+            <h2>Home</h2>
+            <p><strong>Relevant Websites:</strong></p>
+            <a href="https://github.com/Samuel-Georgiev" class="custom-link">GitHub</a>
+            <br>
+            <br>
+            <a href="https://leetcode.com/u/SamuelGeorgiev/" class="custom-link">LeetCode</a>
+            <br>
+            <br>
+            <br>
+        </section>
+        <section id="about">
+            <h2>About</h2>
+            <img src="coverphoto_samuel_georgiev.png" alt="Samuel Georgiev" style="width:200px; height:auto;">
+            <p>Suffolk University student majoring in Business Analytics & Information Systems with a concentration in Cybersecurity. Though my professional journey has just begun, I've participated in various experiences that have shaped my understanding of the business world and sharpened my analytical skills</p>
+
+            <p>I am enthusiastic about enhancing my knowledge in integrating AI into real-world applications through APIs, and working with financial data combining visualization to create comprehensible models.</p>
+
+            <p>I am passionate about finance and data-driven solutions and their role in finance. In my role as a Junior Analyst at the <a href="https://suffolkfinanceclub.wixsite.com/home" target="_blank" class="custom-in-text-link">Suffolk University Finance and Investing Club</a>, I have been actively involved in analysis, stock evaluation, and risk management. Additionally, I have co-managed the school's Tremont Fund portfolio, where I prioritized team-based asset allocation and performance tracking.</p>
+
+            <br>
+        </section>
+        <section id="projects">
+            <h2>Projects</h2>
+            <a href="https://github.com/Samuel-Georgiev/openai-file-analyzer/tree/main" class="title-link"><strong>Openai File Analyzer</strong></a>
+            <p>This Python script functions as a file analyzer that sends the contents of a JSON file to OpenAI for analysis. The script is executed by specifying the path to the JSON file as a command-line argument. It begins by reading the JSON file and extracting its contents. The script then prepares the data to be sent to OpenAI's API, using a predefined system role and user input format. The analysis results are retrieved and displayed to the user. The script handles errors, such as missing API keys or file paths, and provides informative messages throughout its execution. Additionally, it captures and prints the current date and time at the start and end of the analysis process. This tool is useful for automating the analysis of JSON file contents using OpenAI's capabilities.</p>
+            <a href="openai_file_analyzer.py" download class="custom-link">Download OpenaiFileAnalyzer.py</a>
+            <br>
+            <br>
+            <br>
+            <a href="https://github.com/Samuel-Georgiev/crypto_trading_bot" class="title-link"><strong>Crypto Trading Bot</strong></a>
+            <p>This Python script functions as a trading bot that connects to Binance's WebSocket API to receive real-time candlestick data for a specified cryptocurrency pair, such as BTCUSDT, at a 1-minute interval. It processes incoming data messages, extracting relevant details like the opening, highest, lowest, and closing prices, along with the volume and timestamp, and appends them to a DataFrame. The script then calculates moving averages based on the collected data to identify trading signals. Using these signals, the bot makes trading decisions, executing buy or sell orders accordingly. When the connection is closed, the DataFrame, including all trading data and moving averages, is saved to a CSV file. The script also handles errors, notifies when the connection is opened. This allows for automated, data-driven trading based on real-time market conditions.</p>
+            <a href="binance_ohlcv_v6.py" download class="custom-link">Download CryptoTradingBot.py</a>
+            <br>
+            <br>
+            <br>
+        </section>
+        <section id="contact">
+            <h2>Contact</h2>
+            <a href="mailto:samuelgeo.us@gmail.com" class="custom-link">Email</a>
+            <br>
+            <br>
+            <a href="https://www.linkedin.com/in/samuelgeorgiev/" class="custom-link">Linkedin</a>
+
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Samuel Georgiev</p>
+    </footer>
+</body>
+</html>
