@@ -1,0 +1,227 @@
+/* General Body Styling */
+body {
+    font-family: 'Verdana', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #B3B4BD;
+    color: #000;
+}
+
+/* Sticky Header and Navigation Bar */
+header {
+    background: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: left;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    top: 0;
+}
+
+nav {
+    margin: 0;
+    padding: 10px;
+    background: #444;
+    text-align: right;
+}
+
+nav a {
+    color: #fff;
+    margin: 0 10px;
+    text-decoration: none;
+    background-color: #444;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+    background-color: #555;
+}
+
+/* Home Section Styling */
+.home-section {
+    background-color: #333;
+    color: rgb(255, 255, 255);
+    text-align: center;
+    padding: 150px 20px; /* Adjust padding to vertically center the content */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.home-section h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.center-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #ca254e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.center-button:hover {
+    background-color: #555;
+}
+
+/* About Section */
+.about-section {
+    background-color: #333;
+    color: #fffefe;
+    text-align: center; /* Center align the content for the section */
+    padding: 80px 20px;
+}
+
+.about-section .about-content {
+    max-width: 800px;
+    margin: 0 auto; /* Center the content block */
+    text-align: left; /* Ensure text inside this block is left-aligned */
+}
+
+/* Paragraph Styling */
+.about-section p.left-align {
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* Profile Image Styling */
+.profile-image {
+    display: block;
+    margin: 0 auto 20px auto; /* Center the image with auto margins */
+    width: 200px;
+    height: auto;
+    border-radius: 50%; /* Circular image styling */
+}
+
+/* Spinning Image on Hover */
+.spin-image {
+    transition: transform 0.3s ease;
+}
+
+.spin-image:hover {
+    animation: spin 3s infinite linear;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotateY(0deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+/* Projects Section */
+.projects-section {
+    background-color: #333;
+    color: #ffffff;
+    padding: 80px 20px;
+}
+
+.project {
+    max-width: 800px;
+    margin: 20px auto;
+    text-align: left;
+}
+
+.project p {
+    line-height: 1.6;
+}
+
+/* Contact Section */
+.contact-section {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 80px 20px;
+}
+
+/* Footer Styling */
+footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+}
+
+/* Custom Link Styling */
+.title-link {
+    color: #ca254e;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: color 0.3s ease;
+}
+
+.title-link:hover {
+    color: #555;
+}
+
+.custom-in-text-link {
+    color: #ca254e;
+    text-decoration: none;
+}
+
+.custom-in-text-link:hover:hover {
+    color: #555;
+}
+
+.custom-link {
+    color: #000000;
+    text-decoration: none;
+    background-color: #7a7a7a67;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: inline-block;
+    margin: 5px 0;
+}
+
+.custom-link:hover {
+    background-color: #ccc;
+    color: #222;
+}
+
+/* LED Lights Background Styling */
+.led-lights-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1; /* Behind all other content */
+}
+
+.led-light {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #ca254e;
+    border-radius: 50%;
+    opacity: 0.7;
+    pointer-events: none;
+    transition: transform 0.3s ease;
+    animation: move-light 10s infinite alternate ease-in-out; /* Animation for random movement */
+}
+
+/* Animation for random movement */
+@keyframes move-light {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(calc(100vw - 8px), calc(100vh - 8px));
+    }
+}
+
