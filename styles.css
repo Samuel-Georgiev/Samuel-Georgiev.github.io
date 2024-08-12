@@ -190,3 +190,38 @@ footer {
     background-color: #ccc;
     color: #222;
 }
+
+/* LED Lights Background Styling */
+.led-lights-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1; /* Behind all other content */
+}
+
+.led-light {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #ca254e;
+    border-radius: 50%;
+    opacity: 0.7;
+    pointer-events: none;
+    transition: transform 0.3s ease;
+    animation: move-light 10s infinite alternate ease-in-out; /* Animation for random movement */
+}
+
+/* Animation for random movement */
+@keyframes move-light {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(calc(100vw - 8px), calc(100vh - 8px));
+    }
+}
+
