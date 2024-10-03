@@ -200,7 +200,7 @@ footer {
     height: 100%;
     pointer-events: none;
     overflow: hidden;
-    z-index: -1; /* Behind all other content */
+    z-index: 9999; /* Behind all other content */
 }
 
 .led-light {
