@@ -3,8 +3,10 @@ body {
     font-family: 'Verdana', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #B3B4BD;
+    background-color: #333;
     color: #000;
+    position: relative; /* Ensure body content has a z-index */
+    z-index: 1; /* Background should be behind the LED lights */
 }
 
 /* Sticky Header and Navigation Bar */
@@ -15,7 +17,7 @@ header {
     text-align: left;
     position: fixed;
     width: 100%;
-    z-index: 1000;
+    z-index: 1000; /* Keep the header above everything */
     top: 0;
 }
 
@@ -42,7 +44,7 @@ nav a:hover {
 
 /* Home Section Styling */
 .home-section {
-    background-color: #333;
+    background-color: transparent; /* Allow the LED lights to show through */
     color: rgb(255, 255, 255);
     text-align: center;
     padding: 150px 20px; /* Adjust padding to vertically center the content */
@@ -51,6 +53,8 @@ nav a:hover {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    position: relative;
+    z-index: 10; /* Ensure text is above the LED lights */
 }
 
 .home-section h1 {
@@ -75,10 +79,12 @@ nav a:hover {
 
 /* About Section */
 .about-section {
-    background-color: #333;
+    background-color: transparent; /* Allow the LED lights to show through */
     color: #fffefe;
     text-align: center; /* Center align the content for the section */
     padding: 80px 20px;
+    position: relative;
+    z-index: 10; /* Ensure text is above the LED lights */
 }
 
 .about-section .about-content {
@@ -122,9 +128,11 @@ nav a:hover {
 
 /* Projects Section */
 .projects-section {
-    background-color: #333;
+    background-color: transparent; /* Allow the LED lights to show through */
     color: #ffffff;
     padding: 80px 20px;
+    position: relative;
+    z-index: 10; /* Ensure text is above the LED lights */
 }
 
 .project {
@@ -139,10 +147,12 @@ nav a:hover {
 
 /* Contact Section */
 .contact-section {
-    background-color: #333;
+    background-color: transparent; /* Allow the LED lights to show through */
     color: white;
     text-align: center;
     padding: 80px 20px;
+    position: relative;
+    z-index: 10; /* Ensure text is above the LED lights */
 }
 
 /* Footer Styling */
@@ -151,6 +161,8 @@ footer {
     color: #fff;
     text-align: center;
     padding: 10px 0;
+    position: relative;
+    z-index: 10; /* Ensure the footer is above the LED lights */
 }
 
 /* Custom Link Styling */
@@ -171,7 +183,7 @@ footer {
     text-decoration: none;
 }
 
-.custom-in-text-link:hover:hover {
+.custom-in-text-link:hover {
     color: #555;
 }
 
@@ -200,7 +212,7 @@ footer {
     height: 100%;
     pointer-events: none;
     overflow: hidden;
-    z-index: 9999; /* Behind all other content */
+    z-index: 2; /* Ensure LED lights are above the background */
 }
 
 .led-light {
@@ -211,11 +223,11 @@ footer {
     border-radius: 50%;
     opacity: 0.7;
     pointer-events: none;
-    transition: transform 0.3s ease;
-    animation: move-light 10s infinite alternate ease-in-out; /* Animation for random movement */
+    box-shadow: 0 0 10px #ca254e; /* Neon glow effect */
+    animation: move-light 10s infinite alternate ease-in-out;
 }
 
-/* Animation for random movement */
+/* Animation for the lights to move randomly */
 @keyframes move-light {
     0% {
         transform: translate(0, 0);
@@ -224,4 +236,5 @@ footer {
         transform: translate(calc(100vw - 8px), calc(100vh - 8px));
     }
 }
+
 
