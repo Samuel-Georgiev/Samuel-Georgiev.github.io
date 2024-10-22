@@ -12,7 +12,7 @@ document.querySelectorAll('.smooth-scroll').forEach(anchor => {
 // Sticky Navbar
 window.onscroll = function() {
     var navbar = document.querySelector("header");
-    if (window.pageYOffset > 0) {
+    if (window.scrollY > 0) {
         navbar.classList.add("sticky");
     } else {
         navbar.classList.remove("sticky");
@@ -71,3 +71,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Select the image by its ID
+const coinImage = document.getElementById('coinImage');
+
+// Add a click event listener to trigger the animation
+coinImage.addEventListener('click', function() {
+  // Add the 'spin-bounce' class when clicked
+  this.classList.add('spin-bounce');
+  
+  // Remove the class after the animation ends, so it can be applied again on the next click
+  setTimeout(() => {
+    this.classList.remove('spin-bounce');
+  }, 1000); // The duration matches the animation time
+});
+

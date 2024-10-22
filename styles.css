@@ -108,23 +108,36 @@ nav a:hover {
     border-radius: 50%; /* Circular image styling */
 }
 
-/* Spinning Image on Hover */
-.spin-image {
-    transition: transform 0.3s ease;
-}
-
-.spin-image:hover {
-    animation: spin 3s infinite linear;
-}
-
-@keyframes spin {
+/* Initially define the style for the image */
+.profile-image {
+    width: 200px; /* Adjust the size as needed */
+    transition: transform 1s ease-in-out;
+  }
+  
+  /* Define the spinning animation */
+  @keyframes spin {
     0% {
-        transform: rotateY(0deg);
+      transform: rotateY(0deg);
     }
     100% {
-        transform: rotateY(360deg);
+      transform: rotateY(360deg);
     }
-}
+  }
+  
+  /* Define the bouncing effect */
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-100px); /* Adjust the bounce height */
+    }
+  }
+  
+  /* Combine both the spin and bounce */
+  .spin-bounce {
+    animation: spin 1s ease-in-out, bounce 0.5s ease-in-out;
+  }  
 
 /* Projects Section */
 .projects-section {
