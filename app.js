@@ -167,28 +167,44 @@ class MarketDashboard {
             data: []
         });
     }
-    
-    async fetchMarketData() {
+      async fetchMarketData() {
+        console.log('🔍 DEBUG: Starting market data fetch...');
+        
+        // For GitHub Pages, immediately use demo data due to CORS restrictions
+        if (window.location.hostname.includes('github.io') || window.location.hostname.includes('samuelgeorgiev.com')) {
+            console.log('🔍 DEBUG: Detected production environment, using demo data');
+            this.useDemoData();
+            return;
+        }
+        
         try {
             const symbols = Array.from(this.marketCards).map(card => 
                 card.getAttribute('data-symbol')
             );
             
-            // Using Alpha Vantage API for stock data (requires API key)
-            // For demo purposes, we'll use Yahoo Finance proxy or simulate data
+            console.log('🔍 DEBUG: Attempting to fetch real market data for:', symbols);
+            
             const promises = symbols.map(symbol => 
                 this.fetchStockData(symbol)
             );
             
             const results = await Promise.all(promises);
             
+            // Check if we got valid data
+            const validResults = results.filter(data => data !== null);
+            if (validResults.length === 0) {
+                throw new Error('No valid market data received');
+            }
+            
             results.forEach((data, index) => {
                 if (data) {
                     this.updateMarketCard(this.marketCards[index], data);
                 }
             });
+            
+            console.log('✅ Real market data loaded successfully');
         } catch (error) {
-            console.log('Using demo data for market prices');
+            console.log('❌ Real market data failed, using demo data:', error.message);
             this.useDemoData();
         }
     }
@@ -305,43 +321,95 @@ class MarketDashboard {
         ctx.fill();
     }
     
-    generateDemoChartData(points) {
-        const data = [];
-        let base = 100;
-        for (let i = 0; i < points; i++) {
-            base += (Math.random() - 0.5) * 5;
-            data.push(base);
-        }
-        return data;
+    drawChart(card, chartData) {
+        const canvas = card.querySelector('canvas');
+        if (!canvas || !chartData || chartData.length === 0) return;
+        
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+        
+        // Calculate chart dimensions
+        const padding = 10;
+        const chartWidth = width - (padding * 2);
+        const chartHeight = height - (padding * 2);
+        
+        // Find min and max values
+        const minValue = Math.min(...chartData);
+        const maxValue = Math.max(...chartData);
+        const range = maxValue - minValue || 1;
+        
+        // Draw chart line
+        ctx.strokeStyle = '#ca254e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        chartData.forEach((value, index) => {
+            const x = padding + (index / (chartData.length - 1)) * chartWidth;
+            const y = padding + chartHeight - ((value - minValue) / range) * chartHeight;
+            
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        
+        ctx.stroke();
+        
+        // Add gradient fill
+        ctx.lineTo(padding + chartWidth, padding + chartHeight);
+        ctx.lineTo(padding, padding + chartHeight);
+        ctx.closePath();
+        
+        const gradient = ctx.createLinearGradient(0, padding, 0, padding + chartHeight);
+        gradient.addColorStop(0, 'rgba(202, 37, 78, 0.3)');
+        gradient.addColorStop(1, 'rgba(202, 37, 78, 0.05)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fill();
     }
     
-    useDemoData() {
+    async useDemoData() {
+        console.log('🔍 DEBUG: Using demo market data due to API restrictions');
+        
+        // Realistic current market data (as of January 2025)
         const demoData = [
             { 
                 symbol: '^GSPC',
                 price: 5847.63, 
+                change: 48.45,
                 changePercent: 0.84,
-                history: [5820, 5835, 5845, 5840, 5850, 5845, 5847.63]
+                chartData: [5800, 5820, 5835, 5845, 5840, 5850, 5847.63]
             },
             { 
                 symbol: '^IXIC',
                 price: 18540.85, 
+                change: -42.73,
                 changePercent: -0.23,
-                history: [18600, 18580, 18565, 18570, 18550, 18545, 18540.85]
+                chartData: [18600, 18580, 18565, 18570, 18550, 18545, 18540.85]
             },
             { 
                 symbol: '^NYA',
                 price: 19234.78, 
+                change: 213.45,
                 changePercent: 1.12,
-                history: [19100, 19150, 19180, 19200, 19220, 19230, 19234.78]
+                chartData: [19100, 19150, 19180, 19200, 19220, 19230, 19234.78]
             }
         ];
         
         this.marketCards.forEach((card, index) => {
             if (demoData[index]) {
+                console.log(`🔍 DEBUG: Updating ${demoData[index].symbol} with demo data`);
                 this.updateMarketCard(card, demoData[index]);
+                this.drawChart(card, demoData[index].chartData);
             }
         });
+        
+        console.log('✅ Demo market data loaded successfully');
     }
     
     destroy() {
