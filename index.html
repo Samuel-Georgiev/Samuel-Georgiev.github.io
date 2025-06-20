@@ -18,6 +18,7 @@
             </div>            <div class="nav-links">
                 <a href="#home" class="smooth-scroll">Home</a>
                 <a href="#about" class="smooth-scroll">About</a>
+                <a href="#playground" class="smooth-scroll">Code Playground</a>
                 <a href="#projects" class="smooth-scroll">Projects</a>
                 <a href="#contact" class="smooth-scroll">Contact</a>
             </div>
@@ -246,11 +247,98 @@
                     </div>
                 </div>
             </div>
-            <div class="market-disclaimer">
-                <p>Market data provided by Yahoo Finance API. Charts show 7-day trend.</p>
+            <div class="market-disclaimer">                <p>Market data provided by Finnhub Stock API. Charts show 7-day trend.</p>
             </div>
         </div>
     </section>
+
+    <!-- Interactive Code Playground Section -->
+    <section id="playground" class="playground-section fade-in">
+        <div class="container">
+            <h2 class="section-title">Interactive Code Playground</h2>
+            <div class="playground-container">
+                <div class="playground-header">
+                    <div class="playground-tabs">
+                        <button class="tab-btn active" data-language="javascript">JavaScript</button>
+                        <button class="tab-btn" data-language="python">Python</button>
+                        <button class="tab-btn" data-language="html">HTML/CSS</button>
+                    </div>
+                    <div class="playground-actions">
+                        <button class="run-btn" id="runCode">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5,3 19,12 5,21"/>
+                            </svg>
+                            Run Code
+                        </button>
+                        <button class="clear-btn" id="clearCode">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3,6 5,6 21,6"/>
+                                <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="playground-content">
+                    <div class="code-editor-container">
+                        <div class="editor-header">
+                            <span class="editor-title">Code Editor</span>
+                            <div class="editor-controls">
+                                <button class="copy-btn" id="copyCode">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5,15H4a2,2,0,0,1-2-2V4A2,2,0,0,1,4,2H15a2,2,0,0,1,2,2V5"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="codeEditor" class="code-editor" placeholder="// Write your code here..."></textarea>
+                    </div>
+                    
+                    <div class="output-container">
+                        <div class="output-header">
+                            <span class="output-title">Output</span>
+                            <button class="clear-output-btn" id="clearOutput">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="codeOutput" class="code-output"></div>
+                    </div>
+                </div>
+                
+                <div class="example-snippets">
+                    <h3>Example Code Snippets</h3>
+                    <div class="snippets-grid">
+                        <div class="snippet-card" data-language="javascript">
+                            <h4>Array Methods Demo</h4>
+                            <p>Explore JavaScript array manipulation</p>
+                            <button class="load-snippet-btn" data-snippet="js-arrays">Load Example</button>
+                        </div>
+                        <div class="snippet-card" data-language="javascript">
+                            <h4>API Fetch Demo</h4>
+                            <p>Asynchronous data fetching example</p>
+                            <button class="load-snippet-btn" data-snippet="js-fetch">Load Example</button>
+                        </div>
+                        <div class="snippet-card" data-language="python">
+                            <h4>Data Analysis</h4>
+                            <p>Python data processing example</p>
+                            <button class="load-snippet-btn" data-snippet="py-data">Load Example</button>
+                        </div>
+                        <div class="snippet-card" data-language="html">
+                            <h4>Interactive Component</h4>
+                            <p>HTML/CSS/JS component demo</p>
+                            <button class="load-snippet-btn" data-snippet="html-component">Load Example</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="projects" class="projects-section fade-in">
         <div class="container">
             <h2 class="section-title">Projects</h2>
