@@ -1,7 +1,7 @@
 // Debug logging to track loading issues
-console.log('🔍 DEBUG: app.js file loaded successfully');
-console.log('🔍 DEBUG: Current URL:', window.location.href);
-console.log('🔍 DEBUG: Document ready state:', document.readyState);
+console.log('DEBUG: app.js file loaded successfully');
+console.log('DEBUG: Current URL:', window.location.href);
+console.log('DEBUG: Document ready state:', document.readyState);
 
 // Modern JavaScript for Samuel Georgiev's Portfolio
 
@@ -123,31 +123,68 @@ class SkillsAnimator {
     }
 }
 
-// Crypto Dashboard
+// Enhanced Financial Dashboard with Real-Time APIs
 class MarketDashboard {
-    constructor() {
-        this.marketCards = document.querySelectorAll('.market-card');
+    constructor() {        this.marketCards = document.querySelectorAll('.market-card');
         this.updateInterval = null;
-        this.charts = new Map();
+        this.charts = new Map();        this.apiConfig = {
+            // Financial APIs
+            apis: [
+                {
+                    name: 'Finnhub',
+                    key: 'd1au601r01qjhvtrdgv0d1au601r01qjhvtrdgvg', // Your Finnhub API key
+                    baseUrl: 'https://finnhub.io/api/v1',
+                    rateLimit: 60, // requests per minute for free tier
+                    enabled: true
+                }
+            ],
+            currentApiIndex: 0,
+            lastRequestTime: 0,
+            requestCount: 0
+        };
+        this.lastUpdateTime = 0;
+        this.minUpdateInterval = 30000; // Minimum 30 seconds between updates
         this.init();
-    }
-    
-    init() {
-        if (this.marketCards.length === 0) return;
+    }    init() {
+        console.log('DEBUG: MarketDashboard init() called');
+        console.log('DEBUG: Market cards found:', this.marketCards.length);
         
-        // Add loading state initially
-        this.marketCards.forEach(card => {
+        if (this.marketCards.length === 0) {
+            console.error('DEBUG: No market cards found! Dashboard will not initialize.');
+            console.log('DEBUG: Checking if DOM is ready...');
+            console.log('DEBUG: Document ready state:', document.readyState);
+            
+            // Try to find market cards again
+            setTimeout(() => {
+                const retryCards = document.querySelectorAll('.market-card');
+                console.log('DEBUG: Retry: Found market cards after delay:', retryCards.length);
+                if (retryCards.length > 0) {
+                    this.marketCards = retryCards;
+                    this.init(); // Retry initialization
+                }
+            }, 1000);
+            return;
+        }
+        
+        console.log('DEBUG: Initializing Enhanced Financial Dashboard...');
+          // Add loading state initially
+        this.marketCards.forEach((card, index) => {
+            console.log(`DEBUG: Initializing card ${index}:`, card.getAttribute('data-symbol'));
             card.classList.add('loading');
             this.initChart(card);
         });
         
         // Start fetching data
+        console.log('DEBUG: Starting initial data fetch...');
         this.fetchMarketData();
         
-        // Update every 60 seconds for stock data
+        // Update every 60 seconds for stock data (respecting rate limits)
         this.updateInterval = setInterval(() => {
+            console.log('DEBUG: Periodic update triggered');
             this.fetchMarketData();
         }, 60000);
+        
+        console.log('DEBUG: MarketDashboard initialization complete');
     }
     
     initChart(card) {
@@ -166,75 +203,215 @@ class MarketDashboard {
             ctx,
             data: []
         });
-    }
-      async fetchMarketData() {
-        console.log('🔍 DEBUG: Starting market data fetch...');
+    }      async fetchMarketData() {
+        console.log('DEBUG: Starting enhanced market data fetch...');
+        console.log('DEBUG: Market cards found:', this.marketCards.length);
         
-        // For GitHub Pages, immediately use demo data due to CORS restrictions
-        if (window.location.hostname.includes('github.io') || window.location.hostname.includes('samuelgeorgiev.com')) {
-            console.log('🔍 DEBUG: Detected production environment, using demo data');
-            this.useDemoData();
+        // Check if market cards exist
+        if (this.marketCards.length === 0) {
+            console.error('DEBUG: No market cards found in DOM!');
+            console.log('DEBUG: Looking for elements with class "market-card"...');
+            const allMarketCards = document.querySelectorAll('.market-card');
+            console.log('DEBUG: Found market cards:', allMarketCards.length);
             return;
         }
+        
+        const now = Date.now();
+        if (now - this.lastUpdateTime < this.minUpdateInterval) {
+            console.log('DEBUG: Rate limit - using cached data');
+            return;
+        }
+        
+        this.lastUpdateTime = now;
         
         try {
             const symbols = Array.from(this.marketCards).map(card => 
                 card.getAttribute('data-symbol')
             );
             
-            console.log('🔍 DEBUG: Attempting to fetch real market data for:', symbols);
+            console.log('DEBUG: Attempting to fetch real market data for:', symbols);
+            console.log('DEBUG: Available APIs:', this.apiConfig.apis.map(api => `${api.name} (${api.enabled ? 'enabled' : 'disabled'})`));
             
-            const promises = symbols.map(symbol => 
-                this.fetchStockData(symbol)
-            );
+            // Try APIs in order of preference
+            let apiSuccess = false;
             
-            const results = await Promise.all(promises);
-            
-            // Check if we got valid data
-            const validResults = results.filter(data => data !== null);
-            if (validResults.length === 0) {
-                throw new Error('No valid market data received');
+            for (let i = 0; i < this.apiConfig.apis.length && !apiSuccess; i++) {
+                const api = this.apiConfig.apis[i];
+                if (!api.enabled) {
+                    console.log(`DEBUG: Skipping ${api.name} - disabled`);
+                    continue;
+                }
+                
+                try {
+                    console.log(`DEBUG: Trying ${api.name} API...`);
+                    console.log(`DEBUG: API Config:`, { 
+                        name: api.name, 
+                        baseUrl: api.baseUrl, 
+                        hasKey: api.key !== 'demo',
+                        key: api.key.substring(0, 8) + '...' // Show first 8 chars for debugging
+                    });
+                    
+                    const results = await this.fetchFromAPI(api, symbols);
+                    console.log(`DEBUG: ${api.name} API results:`, results);
+                    
+                    if (results && results.length > 0) {
+                        let validResults = 0;
+                        results.forEach((data, index) => {
+                            if (data && this.marketCards[index]) {
+                                console.log(`DEBUG: Updating card ${index} with data:`, data);
+                                this.updateMarketCard(this.marketCards[index], data);
+                                validResults++;
+                            } else {
+                                console.log(`DEBUG: No data for card ${index}`);
+                            }
+                        });
+                        
+                        if (validResults > 0) {
+                            console.log(`Real market data loaded successfully from ${api.name} (${validResults}/${results.length} cards updated)`);
+                            apiSuccess = true;
+                            break;
+                        }
+                    } else {
+                        console.log(`DEBUG: ${api.name} returned no valid results`);
+                    }
+                } catch (error) {
+                    console.log(`${api.name} API failed:`, error.message);
+                    console.error('DEBUG: Full error:', error);
+                    continue;
+                }
             }
             
-            results.forEach((data, index) => {
-                if (data) {
-                    this.updateMarketCard(this.marketCards[index], data);
-                }
-            });
+            // Fallback to demo data if all APIs fail
+            if (!apiSuccess) {
+                console.log('DEBUG: All APIs failed, falling back to demo data');
+                throw new Error('All financial APIs failed');
+            }
             
-            console.log('✅ Real market data loaded successfully');
         } catch (error) {
-            console.log('❌ Real market data failed, using demo data:', error.message);
+            console.log('All real market data sources failed, using demo data:', error.message);
             this.useDemoData();
         }
-    }
-    
-    async fetchStockData(symbol) {
+    }async fetchFromAPI(api, symbols) {
+        const results = [];
+        
+        switch (api.name) {
+            case 'Finnhub':
+                return await this.fetchFromFinnhub(api, symbols);
+                
+            default:
+                throw new Error(`Unknown API: ${api.name}`);
+        }
+    }    async fetchFromFinnhub(api, symbols) {
+        const results = [];
+        
+        for (const symbol of symbols) {
+            try {
+                const mappedSymbol = this.mapSymbolForFinnhub(symbol);
+                console.log(`DEBUG: Fetching Finnhub data for ${symbol} (mapped to ${mappedSymbol})`);
+                
+                // Get quote data
+                const quoteUrl = `${api.baseUrl}/quote?symbol=${mappedSymbol}&token=${api.key}`;
+                console.log(`DEBUG: Request URL: ${quoteUrl}`);
+                
+                const quoteResponse = await fetch(quoteUrl);
+                
+                if (!quoteResponse.ok) {
+                    throw new Error(`HTTP ${quoteResponse.status}: ${quoteResponse.statusText}`);
+                }
+                
+                const quoteData = await quoteResponse.json();
+                console.log(`DEBUG: Finnhub response for ${symbol}:`, quoteData);
+                
+                // Check for error response from Finnhub
+                if (quoteData.error) {
+                    throw new Error(`Finnhub API error: ${quoteData.error}`);
+                }
+                
+                if (quoteData.c && quoteData.c > 0) {
+                    const change = quoteData.c - quoteData.pc;
+                    const changePercent = (change / quoteData.pc) * 100;
+                    
+                    results.push({
+                        symbol: symbol,
+                        price: quoteData.c,
+                        change: change,
+                        changePercent: changePercent,
+                        history: await this.fetchFinnhubCandles(api, mappedSymbol)
+                    });
+                    console.log(`DEBUG: Successfully processed ${symbol}`);
+                } else {
+                    console.log(`DEBUG: Invalid data for ${symbol}: current price = ${quoteData.c}`);
+                    results.push(null);
+                }
+                
+                // Respect rate limits (60 requests per minute = 1 request per second)
+                await this.delay(1000);
+                
+            } catch (error) {
+                console.log(`Finnhub error for ${symbol}:`, error.message);
+                console.error('DEBUG: Full error:', error);
+                results.push(null);
+            }
+        }
+        
+        return results;
+    }    // Symbol mapping functions for Finnhub API
+    mapSymbolForFinnhub(symbol) {
+        const mappings = {
+            '^GSPC': 'SPY',
+            '^IXIC': 'QQQ', 
+            '^NYA': 'VTI'
+        };
+        return mappings[symbol] || symbol;
+    }    async fetchFinnhubCandles(api, symbol) {
         try {
-            // Attempt to use Yahoo Finance API proxy
-            // Note: In production, you'd use a proper financial data API
-            const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`);
+            // Note: stock/candle endpoint requires Premium subscription
+            // For free tier, we'll generate demo data or use alternative approach
+            console.log('Note: Finnhub candle data requires Premium subscription');
+            console.log('Using demo chart data for symbol:', symbol);
+            
+            // Uncomment below if you have Premium Finnhub subscription:
+            /*
+            const to = Math.floor(Date.now() / 1000);
+            const from = to - (7 * 24 * 60 * 60); // 7 days ago
+            
+            const response = await fetch(
+                `${api.baseUrl}/stock/candle?symbol=${symbol}&resolution=D&from=${from}&to=${to}&token=${api.key}`
+            );
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
             
-            if (data.chart && data.chart.result && data.chart.result[0]) {
-                const result = data.chart.result[0];
-                const meta = result.meta;
-                const prices = result.indicators.quote[0];
-                
-                return {
-                    symbol,
-                    price: meta.regularMarketPrice,
-                    change: meta.regularMarketPrice - meta.previousClose,
-                    changePercent: ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100,
-                    history: prices.close.slice(-7) // Last 7 data points for chart
-                };
+            if (data.s === 'ok' && data.c && data.c.length > 0) {
+                return data.c.slice(-7); // Last 7 closing prices
             }
+            */
         } catch (error) {
-            console.log(`Failed to fetch data for ${symbol}`);
+            console.log('Finnhub candles fetch error:', error);
         }
-        return null;
+        
+        return this.generateDemoChartData(7);
     }
-    
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    generateDemoChartData(length) {
+        const data = [];
+        let value = 100 + Math.random() * 50;
+        
+        for (let i = 0; i < length; i++) {
+            value += (Math.random() - 0.5) * 5;
+            data.push(Math.max(50, value));
+        }
+        
+        return data;
+    }
+      
     updateMarketCard(card, data) {
         const priceValue = card.querySelector('.price-value');
         const priceChange = card.querySelector('.price-change');
@@ -252,15 +429,21 @@ class MarketDashboard {
         const formattedChange = `${data.changePercent >= 0 ? '+' : ''}${data.changePercent.toFixed(2)}%`;
         
         // Update DOM
-        priceValue.textContent = formattedPrice;
-        priceChange.textContent = formattedChange;
+        if (priceValue) priceValue.textContent = formattedPrice;
+        if (priceChange) priceChange.textContent = formattedChange;
         
         // Add color class
-        priceChange.classList.remove('positive', 'negative');
-        priceChange.classList.add(data.changePercent >= 0 ? 'positive' : 'negative');
+        if (priceChange) {
+            priceChange.classList.remove('positive', 'negative');
+            priceChange.classList.add(data.changePercent >= 0 ? 'positive' : 'negative');
+        }
         
         // Update chart
         this.updateChart(data.symbol, data.history, data.changePercent >= 0);
+        
+        // Add visual feedback for successful update
+        card.classList.add('updated');
+        setTimeout(() => card.classList.remove('updated'), 1000);
     }
     
     updateChart(symbol, data, isPositive) {
@@ -310,8 +493,7 @@ class MarketDashboard {
                 ctx.lineTo(x, y);
             }
         });
-        
-        ctx.stroke();
+          ctx.stroke();
         
         // Fill area under line
         ctx.lineTo(width, height);
@@ -320,102 +502,89 @@ class MarketDashboard {
         ctx.fillStyle = gradient;
         ctx.fill();
     }
-    
-    drawChart(card, chartData) {
-        const canvas = card.querySelector('canvas');
-        if (!canvas || !chartData || chartData.length === 0) return;
+      async useDemoData() {
+        console.log('DEBUG: Using enhanced demo market data');
         
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width;
-        const height = canvas.height;
-        
-        // Clear canvas
-        ctx.clearRect(0, 0, width, height);
-        
-        // Calculate chart dimensions
-        const padding = 10;
-        const chartWidth = width - (padding * 2);
-        const chartHeight = height - (padding * 2);
-        
-        // Find min and max values
-        const minValue = Math.min(...chartData);
-        const maxValue = Math.max(...chartData);
-        const range = maxValue - minValue || 1;
-        
-        // Draw chart line
-        ctx.strokeStyle = '#ca254e';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        
-        chartData.forEach((value, index) => {
-            const x = padding + (index / (chartData.length - 1)) * chartWidth;
-            const y = padding + chartHeight - ((value - minValue) / range) * chartHeight;
-            
-            if (index === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        });
-        
-        ctx.stroke();
-        
-        // Add gradient fill
-        ctx.lineTo(padding + chartWidth, padding + chartHeight);
-        ctx.lineTo(padding, padding + chartHeight);
-        ctx.closePath();
-        
-        const gradient = ctx.createLinearGradient(0, padding, 0, padding + chartHeight);
-        gradient.addColorStop(0, 'rgba(202, 37, 78, 0.3)');
-        gradient.addColorStop(1, 'rgba(202, 37, 78, 0.05)');
-        
-        ctx.fillStyle = gradient;
-        ctx.fill();
-    }
-    
-    async useDemoData() {
-        console.log('🔍 DEBUG: Using demo market data due to API restrictions');
-        
-        // Realistic current market data (as of January 2025)
+        // More realistic current market data with proper historical charts
         const demoData = [
             { 
                 symbol: '^GSPC',
                 price: 5847.63, 
                 change: 48.45,
                 changePercent: 0.84,
-                chartData: [5800, 5820, 5835, 5845, 5840, 5850, 5847.63]
+                history: [5800, 5820, 5835, 5845, 5840, 5850, 5847.63]
             },
             { 
                 symbol: '^IXIC',
                 price: 18540.85, 
                 change: -42.73,
                 changePercent: -0.23,
-                chartData: [18600, 18580, 18565, 18570, 18550, 18545, 18540.85]
+                history: [18600, 18580, 18565, 18570, 18550, 18545, 18540.85]
             },
             { 
                 symbol: '^NYA',
                 price: 19234.78, 
                 change: 213.45,
                 changePercent: 1.12,
-                chartData: [19100, 19150, 19180, 19200, 19220, 19230, 19234.78]
+                history: [19100, 19150, 19180, 19200, 19220, 19230, 19234.78]
             }
         ];
         
         this.marketCards.forEach((card, index) => {
             if (demoData[index]) {
-                console.log(`🔍 DEBUG: Updating ${demoData[index].symbol} with demo data`);
+                console.log(`DEBUG: Updating ${demoData[index].symbol} with enhanced demo data`);
                 this.updateMarketCard(card, demoData[index]);
-                this.drawChart(card, demoData[index].chartData);
             }
         });
         
-        console.log('✅ Demo market data loaded successfully');
+        // Add demo indicator
+        this.addDemoIndicator();
+        
+        console.log('Enhanced demo market data loaded successfully');
+    }
+      addDemoIndicator() {
+        // Add a small indicator that demo data is being used
+        const indicator = document.createElement('div');
+        indicator.className = 'demo-data-indicator';
+        indicator.innerHTML = 'Demo Data - Add API keys for real-time data';
+        indicator.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 193, 7, 0.9);
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+            animation: fadeInOut 4s ease-in-out;
+        `;
+        
+        document.body.appendChild(indicator);
+        
+        setTimeout(() => {
+            if (indicator.parentNode) {
+                indicator.parentNode.removeChild(indicator);
+            }
+        }, 4000);
     }
     
     destroy() {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
+            this.updateInterval = null;
         }
+        
+        // Clear charts
+        this.charts.clear();
+        
+        // Remove API status display
+        const statusDiv = document.querySelector('.api-status');
+        if (statusDiv && statusDiv.parentNode) {
+            statusDiv.parentNode.removeChild(statusDiv);
+        }
+        
+        console.log('DEBUG: MarketDashboard destroyed');
     }
 }
 
@@ -1301,92 +1470,541 @@ class PerformanceOptimizer {
     }
 }
 
-// Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🔍 DEBUG: DOM Content Loaded - Starting initialization');
-    
-    // Initialize all components
+// ===================================
+// Interactive Code Playground
+// ===================================
+
+class CodePlayground {
+    constructor() {
+        this.currentLanguage = 'javascript';
+        this.codeEditor = document.getElementById('codeEditor');
+        this.codeOutput = document.getElementById('codeOutput');
+        this.runBtn = document.getElementById('runCode');
+        this.clearBtn = document.getElementById('clearCode');
+        this.copyBtn = document.getElementById('copyCode');
+        this.clearOutputBtn = document.getElementById('clearOutput');
+        this.tabBtns = document.querySelectorAll('.tab-btn');
+        this.snippetBtns = document.querySelectorAll('.load-snippet-btn');
+        
+        this.codeExamples = {
+            'js-arrays': {
+                language: 'javascript',
+                title: 'JavaScript Array Methods',
+                code: `// JavaScript Array Methods Demo
+const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+console.log('Original array:', numbers);
+
+// Filter even numbers
+const evenNumbers = numbers.filter(num => num % 2 === 0);
+console.log('Even numbers:', evenNumbers);
+
+// Map to squares
+const squares = numbers.map(num => num * num);
+console.log('Squares:', squares);
+
+// Reduce to sum
+const sum = numbers.reduce((acc, num) => acc + num, 0);
+console.log('Sum:', sum);
+
+// Find first number > 5
+const firstLarge = numbers.find(num => num > 5);
+console.log('First number > 5:', firstLarge);
+
+// Check if any number > 8
+const hasLarge = numbers.some(num => num > 8);
+console.log('Has number > 8:', hasLarge);`
+            },
+            'js-fetch': {
+                language: 'javascript',
+                title: 'Async/Await API Demo',
+                code: `// Async/Await API Fetch Demo
+async function fetchUserData() {
     try {
-        console.log('🔍 DEBUG: Initializing ThemeController...');
-        new ThemeController();
+        console.log('Fetching user data...');
         
-        console.log('🔍 DEBUG: Initializing NavbarController...');
-        new NavbarController();
+        // Simulate API call
+        const response = await fetch('https://jsonplaceholder.typicode.com/users/1');
         
-        console.log('🔍 DEBUG: Initializing ScrollAnimations...');
-        new ScrollAnimations();
+        if (!response.ok) {
+            throw new Error(\`HTTP error! status: \${response.status}\`);
+        }
         
-        console.log('🔍 DEBUG: Initializing StatsCounter...');
-        new StatsCounter();
+        const user = await response.json();
         
-        console.log('🔍 DEBUG: Initializing SkillsAnimator...');
-        new SkillsAnimator();
+        console.log('User data received:');
+        console.log('Name:', user.name);
+        console.log('Email:', user.email);
+        console.log('Company:', user.company.name);
+        console.log('Address:', \`\${user.address.city}, \${user.address.zipcode}\`);
         
-        console.log('🔍 DEBUG: Initializing MarketDashboard...');
-        new MarketDashboard();
-        
-        console.log('🔍 DEBUG: Initializing AOSAnimations...');
-        new AOSAnimations();
-        
-        console.log('🔍 DEBUG: Initializing InteractiveParticleSystem...');
-        new InteractiveParticleSystem();
-        
-        console.log('🔍 DEBUG: Initializing LEDLightsManager...');
-        new LEDLightsManager();
-        
-        console.log('🔍 DEBUG: Initializing MobileMenuController...');
-        new MobileMenuController();
-        
-        console.log('🔍 DEBUG: Initializing ScrollToTop...');
-        new ScrollToTop();
-        
-        console.log('🔍 DEBUG: Initializing PerformanceOptimizer...');
-        new PerformanceOptimizer();
-        
-        console.log('✅ DEBUG: All components initialized successfully');
+        return user;
     } catch (error) {
-        console.error('❌ DEBUG: Error during initialization:', error);
+        console.error('Error fetching user data:', error.message);
+    }
+}
+
+// Execute the async function
+fetchUserData();`
+            },            'py-data': {
+                language: 'python',
+                title: 'Python Data Analysis',
+                code: `# Python Data Analysis Example
+import json
+from datetime import datetime
+
+# Sample sales data
+sales_data = [
+    {"product": "Laptop", "price": 999.99, "quantity": 5, "date": "2024-01-15"},
+    {"product": "Phone", "price": 599.99, "quantity": 12, "date": "2024-01-16"},
+    {"product": "Tablet", "price": 299.99, "quantity": 8, "date": "2024-01-17"},
+    {"product": "Monitor", "price": 199.99, "quantity": 6, "date": "2024-01-18"},
+    {"product": "Keyboard", "price": 79.99, "quantity": 15, "date": "2024-01-19"}
+]
+
+print("Sales Data Analysis")
+print("=" * 30)
+
+# Calculate total revenue
+total_revenue = sum(item["price"] * item["quantity"] for item in sales_data)
+print(f"Total Revenue: \${total_revenue:,.2f}")
+
+# Find best selling product by quantity
+best_seller = max(sales_data, key=lambda x: x["quantity"])
+print(f"Best Seller: {best_seller['product']} ({best_seller['quantity']} units)")
+
+# Calculate average price
+avg_price = sum(item["price"] for item in sales_data) / len(sales_data)
+print(f"Average Price: \${avg_price:.2f}")
+
+# Products over $200
+expensive_products = [item["product"] for item in sales_data if item["price"] > 200]
+print(f"Products over $200: {', '.join(expensive_products)}")
+
+# Generate summary report
+print("\\nDetailed Report:")
+for item in sales_data:
+    revenue = item["price"] * item["quantity"]
+    print(f"• {item['product']}: {item['quantity']} × \${item['price']:.2f} = \${revenue:,.2f}")`
+            },
+            'html-component': {
+                language: 'html',
+                title: 'Interactive HTML Component',
+                code: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Counter</title>
+    <style>
+        .counter-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 300px;
+            margin: 20px auto;
+        }
+        
+        .counter-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .counter-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .counter-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .reset-btn {
+            background: rgba(255,99,99,0.8);
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="counter-container">
+        <h2>Interactive Counter</h2>
+        <div id="counterDisplay" class="counter-display">0</div>
+        <div>
+            <button class="counter-btn" onclick="decrement()">-</button>
+            <button class="counter-btn" onclick="increment()">+</button>
+        </div>
+        <button class="counter-btn reset-btn" onclick="reset()">Reset</button>
+    </div>
+
+    <script>
+        let count = 0;
+        const display = document.getElementById('counterDisplay');
+        
+        function updateDisplay() {
+            display.textContent = count;
+            display.style.transform = 'scale(1.1)';
+            setTimeout(() => display.style.transform = 'scale(1)', 150);
+        }
+        
+        function increment() {
+            count++;
+            updateDisplay();
+        }
+        
+        function decrement() {
+            count--;
+            updateDisplay();
+        }
+        
+        function reset() {
+            count = 0;
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>`
+            }
+        };
+        
+        this.init();
     }
     
-    // Add initial fade-in to all sections
-    document.querySelectorAll('section, header, footer').forEach(element => {
-        if (!element.classList.contains('fade-in')) {
-            element.classList.add('fade-in');
-        }
-    });
-      // Add helpful instructions for particle interaction
-    setTimeout(() => {
-        console.log('🎉 Enhanced Interactive particles loaded!');
-        console.log('🎯 Features:');
-        console.log('   • Drag balls around with your mouse');
-        console.log('   • Double-click empty areas to create new particles');
-        console.log('   • Click empty areas for repulsion effect'); 
-        console.log('   • Press SPACEBAR to toggle attraction/repulsion mode');
-        console.log('   • Move your mouse near balls to see them react!');
-        console.log('💡 Balls now actively interact with your mouse cursor!');
-    }, 2000);
+    init() {
+        if (!this.codeEditor) return; // Exit if playground elements don't exist
+        
+        this.setupEventListeners();
+        this.loadDefaultCode();
+    }
     
-    console.log('Enhanced Portfolio with Interactive Particles initialized successfully! 🚀');
+    setupEventListeners() {
+        // Tab switching
+        this.tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.switchLanguage(btn.dataset.language));
+        });
+        
+        // Control buttons
+        if (this.runBtn) this.runBtn.addEventListener('click', () => this.runCode());
+        if (this.clearBtn) this.clearBtn.addEventListener('click', () => this.clearCode());
+        if (this.copyBtn) this.copyBtn.addEventListener('click', () => this.copyCode());
+        if (this.clearOutputBtn) this.clearOutputBtn.addEventListener('click', () => this.clearOutput());
+        
+        // Snippet loading
+        this.snippetBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.loadSnippet(btn.dataset.snippet));
+        });
+        
+        // Keyboard shortcuts
+        this.codeEditor.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.runCode();
+                } else if (e.key === 'k') {
+                    e.preventDefault();
+                    this.clearOutput();
+                }
+            }
+            
+            // Tab handling
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.codeEditor.selectionStart;
+                const end = this.codeEditor.selectionEnd;
+                const value = this.codeEditor.value;
+                
+                this.codeEditor.value = value.substring(0, start) + '  ' + value.substring(end);
+                this.codeEditor.selectionStart = this.codeEditor.selectionEnd = start + 2;
+            }
+        });
+    }
+    
+    switchLanguage(language) {
+        this.currentLanguage = language;
+        
+        // Update active tab
+        this.tabBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.language === language);
+        });
+        
+        // Update placeholder
+        const placeholders = {
+            javascript: '// Write your JavaScript code here...\\nconsole.log("Hello, World!");',
+            python: '# Write your Python code here...\\nprint("Hello, World!")',
+            html: '<!-- Write your HTML/CSS/JS code here -->\\n<!DOCTYPE html>\\n<html>\\n<head>\\n    <title>My Page</title>\\n</head>\\n<body>\\n    <h1>Hello, World!</h1>\\n</body>\\n</html>'
+        };
+        
+        this.codeEditor.placeholder = placeholders[language] || '// Write your code here...';
+        
+        // Clear editor if switching languages
+        if (this.codeEditor.value.trim() === '') {
+            this.loadDefaultCode();
+        }
+    }
+    
+    loadDefaultCode() {
+        const defaultCode = {
+            javascript: `// Welcome to the JavaScript Playground!
+console.log("Hello, World!");
+
+// Try some array methods
+const numbers = [1, 2, 3, 4, 5];
+const doubled = numbers.map(n => n * 2);
+console.log("Original:", numbers);
+console.log("Doubled:", doubled);`,
+            python: `# Welcome to the Python Playground!
+print("Hello, World!")
+
+# Try some list operations
+numbers = [1, 2, 3, 4, 5]
+doubled = [n * 2 for n in numbers]
+print("Original:", numbers)
+print("Doubled:", doubled)`,
+            html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Demo Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .highlight { color: #ca254e; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Hello, <span class="highlight">World!</span></h1>
+    <p>Welcome to the HTML playground.</p>
+    
+    <script>
+        console.log("JavaScript is working!");
+    </script>
+</body>
+</html>`
+        };
+        
+        this.codeEditor.value = defaultCode[this.currentLanguage] || '';
+    }
+    
+    runCode() {
+        const code = this.codeEditor.value.trim();
+        if (!code) {
+            this.addOutput('Please enter some code to run.', 'info');
+            return;
+        }
+        
+        this.clearOutput();
+        this.addOutput(`Running ${this.currentLanguage} code...`, 'info');
+        
+        try {
+            if (this.currentLanguage === 'javascript') {
+                this.runJavaScript(code);
+            } else if (this.currentLanguage === 'python') {
+                this.runPython(code);
+            } else if (this.currentLanguage === 'html') {
+                this.runHTML(code);
+            }
+        } catch (error) {
+            this.addOutput(`Error: ${error.message}`, 'error');
+        }
+    }
+    
+    runJavaScript(code) {
+        // Capture console output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const outputs = [];
+        
+        console.log = (...args) => {
+            outputs.push({ type: 'log', content: args.map(arg => this.formatValue(arg)).join(' ') });
+            originalLog.apply(console, args);
+        };
+        
+        console.error = (...args) => {
+            outputs.push({ type: 'error', content: args.map(arg => this.formatValue(arg)).join(' ') });
+            originalError.apply(console, args);
+        };
+        
+        console.warn = (...args) => {
+            outputs.push({ type: 'warn', content: args.map(arg => this.formatValue(arg)).join(' ') });
+            originalWarn.apply(console, args);
+        };
+        
+        try {
+            // Execute the code
+            const result = eval(code);
+            
+            // Show console outputs
+            outputs.forEach(output => {
+                this.addOutput(output.content, output.type === 'error' ? 'error' : output.type === 'warn' ? 'info' : 'success');
+            });
+            
+            // Show return value if it exists and isn't undefined
+            if (result !== undefined) {
+                this.addOutput(`Return value: ${this.formatValue(result)}`, 'info');
+            }
+            
+            if (outputs.length === 0 && result === undefined) {
+                this.addOutput('Code executed successfully (no output)', 'success');
+            }
+            
+        } catch (error) {
+            this.addOutput(`JavaScript Error: ${error.message}`, 'error');
+        } finally {
+            // Restore original console methods
+            console.log = originalLog;
+            console.error = originalError;
+            console.warn = originalWarn;
+        }
+    }
+    
+    runPython(code) {
+        this.addOutput('Python execution is simulated in this demo.', 'info');
+        this.addOutput('In a real implementation, this would use:', 'info');
+        this.addOutput('• Pyodide (Python in WebAssembly)', 'info');
+        this.addOutput('• Server-side Python execution', 'info');
+        this.addOutput('• Or browser-based Python interpreter', 'info');
+        this.addOutput('', '');
+        this.addOutput('Simulated output for your Python code:', 'success');
+        
+        // Simple simulation - look for print statements
+        const printMatches = code.match(/print\\([^)]+\\)/g);
+        if (printMatches) {
+            printMatches.forEach(match => {
+                const content = match.replace(/print\\(|\\)/g, '').replace(/['"]/g, '');
+                this.addOutput(content, 'success');
+            });
+        } else {
+            this.addOutput('Python code would execute here', 'success');
+        }
+    }
+    
+    runHTML(code) {
+        // Create a new window/iframe to display HTML
+        const newWindow = window.open('', '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+        
+        if (newWindow) {
+            newWindow.document.write(code);
+            newWindow.document.close();
+            this.addOutput('HTML code opened in new window', 'success');
+        } else {
+            // Fallback: show in output area
+            this.addOutput('HTML Preview:', 'info');
+            this.addOutput('(Pop-up blocked - code would open in new window)', 'info');
+            this.addOutput('', '');
+            this.addOutput(code, 'info');
+        }
+    }
+    
+    formatValue(value) {
+        if (typeof value === 'object') {
+            return JSON.stringify(value, null, 2);
+        }
+        return String(value);
+    }
+    
+    addOutput(content, type = 'info') {
+        const outputLine = document.createElement('div');
+        outputLine.className = `output-line output-${type}`;
+        outputLine.textContent = content;
+        this.codeOutput.appendChild(outputLine);
+        this.codeOutput.scrollTop = this.codeOutput.scrollHeight;
+    }
+    
+    clearCode() {
+        this.codeEditor.value = '';
+        this.codeEditor.focus();
+    }
+    
+    clearOutput() {
+        this.codeOutput.innerHTML = '';
+    }
+    
+    copyCode() {
+        navigator.clipboard.writeText(this.codeEditor.value).then(() => {
+            // Visual feedback
+            const originalText = this.copyBtn.innerHTML;
+            this.copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>';
+            setTimeout(() => {
+                this.copyBtn.innerHTML = originalText;
+            }, 1000);
+        }).catch(err => {
+            console.error('Failed to copy code:', err);
+        });
+    }
+    
+    loadSnippet(snippetId) {
+        const snippet = this.codeExamples[snippetId];
+        if (snippet) {
+            // Switch to the correct language tab
+            this.switchLanguage(snippet.language);
+            
+            // Load the code
+            this.codeEditor.value = snippet.code;
+            
+            // Clear output and show info
+            this.clearOutput();
+            this.addOutput(`Loaded: ${snippet.title}`, 'info');
+            this.addOutput('Click "Run Code" to execute this example', 'info');
+        }
+    }
+}
+
+// ===================================
+// Application Initialization
+// ===================================
+
+// Initialize all components when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DEBUG: DOM loaded, initializing application components...');
+    
+    try {
+        // Initialize core components
+        const themeController = new ThemeController();
+        const statsCounter = new StatsCounter();
+        const skillsAnimator = new SkillsAnimator();
+        const marketDashboard = new MarketDashboard();
+        const navbarController = new NavbarController();
+        const scrollAnimations = new ScrollAnimations();
+        const mobileMenuController = new MobileMenuController();
+        const scrollToTop = new ScrollToTop();
+        const performanceOptimizer = new PerformanceOptimizer();
+        const aosAnimations = new AOSAnimations();
+        
+        // Initialize interactive features
+        const particleSystem = new InteractiveParticleSystem();
+        const ledLights = new LEDLightsManager();
+        
+        // Initialize code playground
+        const codePlayground = new CodePlayground();
+        
+        console.log('DEBUG: All application components initialized successfully');
+        
+        // Add global debug helpers
+        window.debugMarketDashboard = window.debugMarketDashboard || (() => {
+            console.log('Market Dashboard Debug not available');
+        });
+        
+        window.testFinnhubAPI = window.testFinnhubAPI || (() => {
+            console.log('Finnhub API test not available');
+        });
+        
+    } catch (error) {
+        console.error('DEBUG: Error initializing application:', error);
+    }
 });
 
-// Handle window resize for responsive adjustments
-window.addEventListener('resize', debounce(() => {
-    // Reinitialize LED lights manager if significant size change
-    const isNowMobile = window.innerWidth < 768;
-    if (isNowMobile !== document.body.classList.contains('mobile-optimized')) {
-        location.reload(); // Simple solution for dramatic layout changes
-    }
-}, 250));
-
-// Utility function for debouncing
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
+console.log('DEBUG: Added CodePlayground class and initialization to app.js');
