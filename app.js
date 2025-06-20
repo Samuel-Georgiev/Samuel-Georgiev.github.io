@@ -1,3 +1,8 @@
+// Debug logging to track loading issues
+console.log('🔍 DEBUG: app.js file loaded successfully');
+console.log('🔍 DEBUG: Current URL:', window.location.href);
+console.log('🔍 DEBUG: Document ready state:', document.readyState);
+
 // Modern JavaScript for Samuel Georgiev's Portfolio
 
 // Theme Controller
@@ -1230,19 +1235,50 @@ class PerformanceOptimizer {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🔍 DEBUG: DOM Content Loaded - Starting initialization');
+    
     // Initialize all components
-    new ThemeController();
-    new NavbarController();
-    new ScrollAnimations();
-    new StatsCounter();
-    new SkillsAnimator();
-    new MarketDashboard();
-    new AOSAnimations();
-    new InteractiveParticleSystem(); // New interactive particle system
-    new LEDLightsManager();
-    new MobileMenuController();
-    new ScrollToTop();
-    new PerformanceOptimizer();
+    try {
+        console.log('🔍 DEBUG: Initializing ThemeController...');
+        new ThemeController();
+        
+        console.log('🔍 DEBUG: Initializing NavbarController...');
+        new NavbarController();
+        
+        console.log('🔍 DEBUG: Initializing ScrollAnimations...');
+        new ScrollAnimations();
+        
+        console.log('🔍 DEBUG: Initializing StatsCounter...');
+        new StatsCounter();
+        
+        console.log('🔍 DEBUG: Initializing SkillsAnimator...');
+        new SkillsAnimator();
+        
+        console.log('🔍 DEBUG: Initializing MarketDashboard...');
+        new MarketDashboard();
+        
+        console.log('🔍 DEBUG: Initializing AOSAnimations...');
+        new AOSAnimations();
+        
+        console.log('🔍 DEBUG: Initializing InteractiveParticleSystem...');
+        new InteractiveParticleSystem();
+        
+        console.log('🔍 DEBUG: Initializing LEDLightsManager...');
+        new LEDLightsManager();
+        
+        console.log('🔍 DEBUG: Initializing MobileMenuController...');
+        new MobileMenuController();
+        
+        console.log('🔍 DEBUG: Initializing ScrollToTop...');
+        new ScrollToTop();
+        
+        console.log('🔍 DEBUG: Initializing PerformanceOptimizer...');
+        new PerformanceOptimizer();
+        
+        console.log('✅ DEBUG: All components initialized successfully');
+    } catch (error) {
+        console.error('❌ DEBUG: Error during initialization:', error);
+    }
     
     // Add initial fade-in to all sections
     document.querySelectorAll('section, header, footer').forEach(element => {
