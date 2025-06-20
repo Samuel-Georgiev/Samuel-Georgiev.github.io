@@ -30,6 +30,20 @@
     --spacing-2xl: 4rem;
 }
 
+/* Dark/Light Theme Variables */
+:root[data-theme="light"] {
+    --background-dark: #f8f9fa;
+    --background-secondary: #ffffff;
+    --background-card: #ffffff;
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --border-color: #e2e8f0;
+    --shadow-light: rgba(202, 37, 78, 0.15);
+    --shadow-medium: rgba(202, 37, 78, 0.25);
+    --shadow-heavy: rgba(0, 0, 0, 0.1);
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -523,8 +537,8 @@ footer p {
     font-size: 0.9rem;
 }
 
-/* LED Lights Background */
-.led-lights-container {
+/* Interactive Particle System Background */
+.interactive-particles {
     position: fixed;
     top: 0;
     left: 0;
@@ -535,16 +549,136 @@ footer p {
     z-index: -1;
 }
 
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: auto;
+    cursor: grab;
+    transition: all 0.1s ease;
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.3), 
+        var(--primary-color));
+    box-shadow: 
+        0 0 10px rgba(202, 37, 78, 0.3),
+        inset 0 0 10px rgba(255, 255, 255, 0.2);
+    user-select: none;
+}
+
+.particle:hover {
+    cursor: grab;
+    transform: scale(1.1);
+    box-shadow: 
+        0 0 20px rgba(202, 37, 78, 0.5),
+        inset 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.particle:active {
+    cursor: grabbing;
+    transform: scale(0.9);
+}
+
+.particle.dragging {
+    z-index: 1000;
+    transform: scale(1.2);
+    box-shadow: 
+        0 0 30px rgba(202, 37, 78, 0.7),
+        inset 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.particle.small {
+    width: 8px;
+    height: 8px;
+}
+
+.particle.medium {
+    width: 15px;
+    height: 15px;
+}
+
+.particle.large {
+    width: 25px;
+    height: 25px;
+}
+
+.particle.extra-large {
+    width: 35px;
+    height: 35px;
+}
+
+/* Particle trails */
+.particle-trail {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, 
+        rgba(202, 37, 78, 0.4), 
+        transparent);
+    animation: fadeTrail 0.5s ease-out forwards;
+}
+
+@keyframes fadeTrail {
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+}
+
+/* Ripple effect when particles collide or are released */
+.particle-ripple {
+    position: absolute;
+    border: 2px solid rgba(202, 37, 78, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: rippleExpand 0.6s ease-out forwards;
+}
+
+@keyframes rippleExpand {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+    }
+}
+
+/* Enhanced LED lights with different behaviors */
 .led-light {
     position: absolute;
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
     background-color: var(--primary-color);
     border-radius: 50%;
-    opacity: 0.6;
+    opacity: 0.4;
     pointer-events: none;
-    box-shadow: 0 0 15px var(--primary-color);
-    animation: move-light 15s infinite linear;
+    box-shadow: 0 0 8px var(--primary-color);
+    animation: move-light 20s infinite linear;
+}
+
+.led-light.fast {
+    animation-duration: 12s;
+    opacity: 0.6;
+}
+
+.led-light.slow {
+    animation-duration: 30s;
+    opacity: 0.3;
+}
+
+.led-light.pulse {
+    animation: move-light 20s infinite linear, pulse-light 2s infinite ease-in-out;
+}
+
+@keyframes pulse-light {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.8; }
 }
 
 @keyframes move-light {
@@ -552,15 +686,65 @@ footer p {
         transform: translate(0, 100vh) rotate(0deg);
         opacity: 0;
     }
-    10% {
-        opacity: 0.6;
+    5% {
+        opacity: 0.4;
     }
-    90% {
-        opacity: 0.6;
+    95% {
+        opacity: 0.4;
     }
     100% {
         transform: translate(100vw, -10vh) rotate(360deg);
         opacity: 0;
+    }
+}
+
+/* Particle physics zones for different sections */
+.home-section .interactive-particles .particle {
+    filter: brightness(1.2);
+}
+
+.stats-section .interactive-particles .particle {
+    filter: hue-rotate(15deg);
+}
+
+.market-dashboard .interactive-particles .particle {
+    filter: hue-rotate(-15deg) saturate(1.3);
+}
+
+/* Mobile optimizations for particles */
+@media (max-width: 768px) {
+    .particle.extra-large {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .particle.large {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .particle:hover {
+        transform: scale(1.05);
+    }
+    
+    .particle.dragging {
+        transform: scale(1.1);
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .particle {
+        transition: none;
+    }
+    
+    .particle-trail,
+    .particle-ripple {
+        display: none;
+    }
+    
+    .led-light.pulse {
+        animation: move-light 20s infinite linear;
     }
 }
 
@@ -706,101 +890,469 @@ header.scrolled {
     }
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .about-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-lg);
-        text-align: center;
+/* Navigation Actions */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    position: relative;
+}
+
+.theme-btn {
+    background: var(--background-card);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-medium);
+    color: var(--text-primary);
+}
+
+.theme-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.theme-btn .sun-icon {
+    display: none;
+}
+
+.theme-btn .moon-icon {
+    display: block;
+}
+
+[data-theme="light"] .theme-btn .sun-icon {
+    display: block;
+}
+
+[data-theme="light"] .theme-btn .moon-icon {
+    display: none;
+}
+
+/* Stats Section */
+.stats-section {
+    padding: var(--spacing-xl) 0;
+    background: linear-gradient(135deg, var(--background-secondary), var(--background-dark));
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.stat-item {
+    text-align: center;
+    padding: var(--spacing-lg);
+    background: var(--background-card);
+    border-radius: var(--border-radius-large);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto var(--spacing-sm);
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+    font-family: var(--font-mono);
+}
+
+.stat-label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.stat-sublabel {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Enhanced Skills Section */
+.skills-section {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.skills-section h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.skills-list {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.skill-item {
+    background: var(--background-dark);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-medium);
+}
+
+.skill-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.skill-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.skill-percentage {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    font-family: var(--font-mono);
+}
+
+.skill-bar {
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.skill-progress {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.skill-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.skill-progress.animate {
+    animation: skillLoad 1.5s ease-out forwards;
+}
+
+/* Crypto Dashboard */
+.market-dashboard {
+    padding: var(--spacing-2xl) 0;
+    background: var(--background-dark);
+}
+
+.market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.market-card {
+    background: var(--background-card);
+    border-radius: var(--border-radius-large);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.market-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+}
+
+.market-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.market-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.market-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.market-info {
+    flex: 1;
+}
+
+.market-name {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.market-symbol {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.market-price {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.market-chart {
+    background: var(--background-secondary);
+    border-radius: var(--border-radius-medium);
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.market-chart canvas {
+    width: 100%;
+    height: 60px;
+    display: block;
+}
+
+.price-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    font-family: var(--font-mono);
+}
+
+.price-change {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-small);
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: var(--font-mono);
+}
+
+.price-change.positive {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.price-change.negative {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.market-disclaimer {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+}
+
+.market-disclaimer p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+/* Loading states */
+.market-card.loading .price-value,
+.market-card.loading .price-change {
+    background: var(--border-color);
+    color: transparent;
+    border-radius: 4px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Enhanced animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
     }
-    
-    .about-image-container {
-        position: static;
-    }
-    
-    .projects-grid {
-        grid-template-columns: 1fr;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* AOS-like animations */
+[data-aos="fade-up"] {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+[data-aos="fade-up"].aos-animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+[data-aos="slide-right"] {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: all 0.8s ease;
+}
+
+[data-aos="slide-right"].aos-animate {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Enhanced project cards with 3D effect */
+.project-card {
+    transform: perspective(1000px) rotateY(0deg);
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.project-card:hover {
+    transform: perspective(1000px) rotateY(5deg) translateZ(20px);
+}
+
+/* Mobile adjustments */
 @media (max-width: 768px) {
-    :root {
-        --spacing-xl: 2rem;
-        --spacing-2xl: 3rem;
+    .nav-actions {
+        gap: var(--spacing-xs);
     }
     
-    .nav-links {
-        display: none;
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
     }
     
-    .mobile-menu-toggle {
-        display: flex;
+    .crypto-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
     }
     
-    .hero-title {
-        font-size: 2.5rem;
-    }
-    
-    .section-title {
+    .stat-number {
         font-size: 2rem;
     }
     
-    .profile-image {
-        width: 200px;
-        height: 200px;
-    }
-    
-    .about-card {
-        padding: var(--spacing-lg);
-    }
-    
-    .project-card {
-        padding: var(--spacing-lg);
-    }
-    
-    .projects-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .contact-links {
-        grid-template-columns: 1fr;
-    }
-    
-    .skills-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .project-card:hover {
+        transform: none;
     }
 }
 
 @media (max-width: 480px) {
-    .container {
-        padding: 0 var(--spacing-sm);
-    }
-    
-    .hero-title {
-        font-size: 2rem;
-    }
-    
-    .hero-subtitle {
-        font-size: 1.1rem;
-    }
-    
-    .profile-image {
-        width: 150px;
-        height: 150px;
-    }
-    
-    .projects-grid {
+    .stats-grid,
+    .crypto-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .project-card, .about-card {
-        padding: var(--spacing-md);
     }
 }
 
-/* Smooth scrolling offset for fixed header */
-section {
-    scroll-margin-top: 80px;
+/* Counter animation for stats */
+@keyframes countUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Loading animation */
@@ -834,6 +1386,64 @@ section {
     html {
         scroll-behavior: auto;
     }
+}
+
+/* Mouse trail effect */
+.mouse-trail {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, 
+        rgba(202, 37, 78, 0.6), 
+        transparent);
+    animation: fadeMouseTrail 0.3s ease-out forwards;
+    z-index: 1;
+}
+
+@keyframes fadeMouseTrail {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+}
+
+/* Interaction mode indicator */
+.interaction-mode-indicator {
+    animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    20%, 80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* Enhanced particle hover effects based on interaction mode */
+.particle.attraction-mode {
+    box-shadow: 
+        0 0 15px rgba(0, 123, 255, 0.4),
+        inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.particle.repulsion-mode {
+    box-shadow: 
+        0 0 15px rgba(255, 69, 0, 0.4),
+        inset 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 
